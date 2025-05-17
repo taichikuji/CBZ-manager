@@ -7,7 +7,8 @@ name = "pypi"
 
 [dev-packages]
 black = "*"
-pep8 = "*"
+pycodestyle = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3.12"

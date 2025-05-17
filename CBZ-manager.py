@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from glob import glob
 from pathlib import Path
 from argparse import ArgumentParser
 import re
@@ -108,12 +107,12 @@ def main():
     try:
         input_path = Path(args.input or Path(__file__).parent).resolve()
         output_path = Path(args.output or input_path).resolve()
-    except:
-        print("[ERROR] Unable to determine script directory.")
+    except Exception as e:
+        print(f"[ERROR] Unable to determine script directory: {e}")
         return
 
     print(
-        f"[INFO] CBZ-Manager.py executed with input path: {input_path} and output path: {output_path}"
+        f"[INFO] --input [{input_path}] | --output [{output_path}]"
     )
 
     files = list(Path(input_path).glob("*.cbz"))
