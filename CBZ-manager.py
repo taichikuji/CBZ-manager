@@ -77,7 +77,7 @@ def process_files(
 
 def combine_volumes(
     extracted: Dict[Tuple[str, int], Path], temp_dir: Path
-) -> Tuple[Path, str]:
+) -> Path:
     """Combine all volumes into a single directory."""
     combined_dir = Path(temp_dir) / "ALL_COMBINED"
     combined_dir.mkdir(exist_ok=True)
@@ -92,7 +92,7 @@ def combine_volumes(
     return combined_dir
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser(description="CBZ file manager tool")
     parser.add_argument("--input", type=str, help="Input folder path", default=None)
     parser.add_argument("--output", type=str, help="Output folder path", default=None)
@@ -120,17 +120,17 @@ def main():
         print("No CBZ files found.")
         return
 
-    organized = process_files(files, args.title)
+    organized = process_files([str(f) for f in files], args.title)
 
     # Now that I have the variable sorted_files, I can unzip the files accordingly.
     # If --output folder is set, it will choose that.
     # Otherwise default input folder.
     with TemporaryDirectory() as temp_dir:
-        extracted = extract_cbz_to_temp(organized, temp_dir)
+        extracted = extract_cbz_to_temp(organized, Path(temp_dir))
         out_dir = Path(output_path)
         out_dir.mkdir(parents=True, exist_ok=True)
         if args.all:
-            combined_dir = combine_volumes(extracted, temp_dir)
+            combined_dir = combine_volumes(extracted, Path(temp_dir))
 
             if keys := list(organized.keys()):
                 out_name = f"{keys[0][0]}.cbz"
