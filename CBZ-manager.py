@@ -3,7 +3,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 import re
 from tempfile import TemporaryDirectory
-from zipfile import ZipFile, ZIP_LZMA
+from zipfile import ZipFile, ZIP_DEFLATED
 from shutil import copy, copytree
 
 from typing import Dict, List, Tuple, Optional
@@ -28,7 +28,7 @@ def extract_cbz_to_temp(
 
 
 def create_cbz_from_dir(output_path: Path, input_dir: Path) -> None:
-    with ZipFile(output_path, "w", compression=ZIP_LZMA, compresslevel=9) as zipf:
+    with ZipFile(output_path, "w", compression=ZIP_DEFLATED, compresslevel=9) as zipf:
         files = [f for f in sorted(input_dir.rglob("*")) if f.is_file()]
         for idx, file in enumerate(files, 1):
             ext = file.suffix
@@ -41,9 +41,9 @@ def extract_info(
 ) -> Tuple[str, int, int]:
     base = Path(filename).stem
     volume_match = re.search(r"(?:vol(?:ume)?\.?\s*|v\.?\s*)(\d+)", base, re.IGNORECASE)
-    volume = int(volume_match.group(1)) if volume_match else 0
+    volume = int(volume_match.group(1)) if volume_match else 1
     chapter_match = re.search(r"(?:ch(?:apter)?\.?\s*)(\d+)", base, re.IGNORECASE)
-    chapter = int(chapter_match.group(1)) if chapter_match else 0
+    chapter = int(chapter_match.group(1)) if chapter_match else 1
     if manual_title is not None:
         title = manual_title
     else:
