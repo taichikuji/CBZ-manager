@@ -20,7 +20,7 @@ def extract_cbz_to_temp(
         for cbz in files:
             with ZipFile(cbz, "r") as zip_ref:
                 # print(f"[DEBUG] [EXTRACT] {cbz} -> {vol_dir}")
-                chapter_dir = vol_dir / f"Chapter_{chapter:03d}"
+                chapter_dir = vol_dir / f"Chapter_{chapter:06.1f}".replace('.0', '')
                 chapter_dir.mkdir(exist_ok=True)
                 zip_ref.extractall(chapter_dir)
         extracted[(title, vol)] = vol_dir
@@ -41,12 +41,12 @@ def create_cbz_from_dir(output_path: Path, input_dir: Path) -> None:
 
 def extract_info(
     filename: str, manual_title: Optional[str] = None
-) -> Tuple[str, int, int]:
+) -> Tuple[str, float, int]:
     base = Path(filename).stem
     volume_match = re.search(r"(?:vol(?:ume)?\.?\s*|v\.?\s*)(\d+)", base, re.IGNORECASE)
     volume = int(volume_match.group(1)) if volume_match else 1
-    chapter_match = re.search(r"(?:ch(?:apter)?\.?\s*)(\d+)", base, re.IGNORECASE)
-    chapter = int(chapter_match.group(1)) if chapter_match else 1
+    chapter_match = re.search(r"(?:ch(?:apter)?\.?\s*)(\d+(?:\.\d+)?)", base, re.IGNORECASE)
+    chapter = float(chapter_match.group(1)) if chapter_match else 1
     if manual_title is not None:
         title = manual_title
     else:
