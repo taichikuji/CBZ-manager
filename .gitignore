@@ -176,3 +176,5 @@ cython_debug/
 # test_input and test_output files for CBZ-manager.py
 test_input/
 test_output/
+input/
+output/

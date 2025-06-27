@@ -19,6 +19,7 @@ def extract_cbz_to_temp(
         vol_dir.mkdir(parents=True, exist_ok=True)
         for cbz in files:
             with ZipFile(cbz, "r") as zip_ref:
+                # print(f"[DEBUG] [EXTRACT] {cbz} -> {vol_dir}")
                 chapter_dir = vol_dir / f"Chapter_{chapter:03d}"
                 chapter_dir.mkdir(exist_ok=True)
                 zip_ref.extractall(chapter_dir)
@@ -28,12 +29,14 @@ def extract_cbz_to_temp(
 
 
 def create_cbz_from_dir(output_path: Path, input_dir: Path) -> None:
+    """Create a CBZ file from the contents of a directory."""
     with ZipFile(output_path, "w", compression=ZIP_DEFLATED, compresslevel=9) as zipf:
         files = [f for f in sorted(input_dir.rglob("*")) if f.is_file()]
         for idx, file in enumerate(files, 1):
+            # print(f"[DEBUG] [COMPRESS] {file} -> {idx}")
             ext = file.suffix
             zipf.write(file, f"{idx:04d}{ext}")
-        print(f"[INFO] Created CBZ file: {output_path}")
+        print(f"[INFO] [COMPRESS] Created CBZ file: {output_path}")
 
 
 def extract_info(
@@ -69,16 +72,17 @@ def process_files(
     sorted_files = sort_files(files, manual_title)
     organized = {}
     for file in sorted_files:
-        print(f"[INFO] {file}")
         info = extract_info(file, manual_title)
         organized[info] = organized.get(info, []) + [file]
+        # print(f"[DEBUG] [PROCESS] {file} -> {info}")
+    print(f"[INFO] [PROCESS] Sorted {len(organized)} CBZ files.")
     return organized
 
 
 def combine_volumes(
     extracted: Dict[Tuple[str, int], Path], temp_dir: Path
 ) -> Path:
-    """Combine all volumes into a single directory."""
+    """Combine all volumes into a single directory when using --all flag"""
     combined_dir = Path(temp_dir) / "ALL_COMBINED"
     combined_dir.mkdir(exist_ok=True)
 
@@ -88,7 +92,6 @@ def combine_volumes(
                 copy(item, combined_dir / item.name)
             elif item.is_dir():
                 copytree(item, combined_dir / item.name, dirs_exist_ok=True)
-
     return combined_dir
 
 
@@ -112,12 +115,12 @@ def main() -> None:
         return
 
     print(
-        f"[INFO] --input [{input_path}] | --output [{output_path}]"
+        f"[INFO] Attempting to run CBZ-manager with --input [{input_path}] | --output [{output_path}]"
     )
 
     files = list(Path(input_path).glob("*.cbz"))
     if not files:
-        print("No CBZ files found.")
+        print("[ERROR] Stopping. No CBZ files found.")
         return
 
     organized = process_files([str(f) for f in files], args.title)
